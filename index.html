@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ByaheGo — Provincial &amp; Local Fare Guide</title>
+  <link rel="stylesheet" href="try.css">
+</head>
+<body>
+  <!-- TOP APP HEADER -->
+  <header class="app-header">
+    <div class="header-left">
+      <button id="btnOpenDrawer" class="icon-btn" aria-label="Open Navigation Menu">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+      <div class="brand-lockup" data-nav="home" role="button" tabindex="0">
+        <div class="brand-badge">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M5 17h14M7 11h10l1.5 6h-13L7 11zM9 11V7h6v4"></path>
+            <circle cx="7.5" cy="17.5" r="1.5"></circle>
+            <circle cx="16.5" cy="17.5" r="1.5"></circle>
+          </svg>
+        </div>
+        <div>
+          <span class="brand-title">Taripa<span class="accent-yellow">PH</span></span>
+          <span class="brand-sub">Commuter Fare &amp; TODA Directory</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <button id="btnHeaderAuth" class="pill-btn pill-yellow">Guest Mode</button>
+    </div>
+  </header>
+
+  <!-- DEMO MODE DISCLAIMER BANNER -->
+  <div class="demo-banner" role="status">
+    <span class="demo-dot"></span>
+    <span><strong>Prototype Demo:</strong> Sample tariff rates &amp; local browser storage (<code>localStorage</code>). Verify official LGU ordinances before disputing fares.</span>
+  </div>
+
+  <!-- HAMBURGER SIDE DRAWER -->
+  <div id="drawerBackdrop" class="drawer-backdrop" aria-hidden="true"></div>
+  <aside id="sideDrawer" class="side-drawer" aria-label="Main Side Navigation">
+    <div class="drawer-header">
+      <div class="drawer-user">
+        <div id="drawerAvatar" class="avatar-circle">G</div>
+        <div>
+          <div id="drawerUserName" class="drawer-name">Guest Commuter</div>
+          <div id="drawerUserRole" class="drawer-role">Public Access</div>
+        </div>
+      </div>
+      <button id="btnCloseDrawer" class="icon-btn light" aria-label="Close Navigation Menu">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <nav class="drawer-nav">
+      <div class="drawer-section-label">Commuter Tools</div>
+      <button class="drawer-link active" data-nav="home">
+        <span class="nav-ico">🏠</span> Home
+      </button>
+      <button class="drawer-link" data-nav="compute">
+        <span class="nav-ico">🧮</span> Compute Fare
+      </button>
+      <button class="drawer-link" data-nav="search">
+        <span class="nav-ico">🛺</span> TODA &amp; Units
+      </button>
+      <button class="drawer-link" data-nav="ratings">
+        <span class="nav-ico">⭐</span> Ratings &amp; Reviews
+      </button>
+      <button class="drawer-link" data-nav="taripa">
+        <span class="nav-ico">📋</span> Official Taripa
+      </button>
+      <button class="drawer-link" data-nav="history" data-requires-auth="true">
+        <span class="nav-ico">🕒</span> Trip History <span class="lock-tag" id="lockHistory">Login</span>
+      </button>
+
+      <div id="roleDashboardSection" class="drawer-role-group hidden">
+        <div class="drawer-section-label">Role Workspace</div>
+        <button id="navDriverDash" class="drawer-link hidden" data-nav="driver-dash">
+          <span class="nav-ico">🪪</span> Driver Dashboard
+        </button>
+        <button id="navTodaDash" class="drawer-link hidden" data-nav="toda-dash">
+          <span class="nav-ico">🏛️</span> TODA Official Dashboard
+        </button>
+        <button id="navAdminDash" class="drawer-link hidden" data-nav="admin-dash">
+          <span class="nav-ico">🛡️</span> Administrator Dashboard
+        </button>
+      </div>
+
+      <div class="drawer-section-label">System &amp; Info</div>
+      <button class="drawer-link" data-nav="settings">
+        <span class="nav-ico">⚙️</span> Settings
+      </button>
+      <button class="drawer-link" data-nav="about">
+        <span class="nav-ico">ℹ️</span> About TaripaPH
+      </button>
+    </nav>
+
+    <div class="drawer-footer">
+      <button id="btnDrawerAuthAction" class="btn btn-primary btn-block">Sign In / Register</button>
+    </div>
+  </aside>
+
+  <!-- MAIN APPLICATION CONTAINER -->
+  <main id="appMain" class="app-main">
+
+    <!-- ==================== 1. HOME MODULE ==================== -->
+    <section id="view-home" class="view active">
+      <div class="hero-card">
+        <div class="hero-eyebrow">Know Your Fare Before You Ride</div>
+        <h1>Transparent Tricycle, Jeepney &amp; Bus Fares</h1>
+        <p>Compute shared or pakyawan fares, verify TODA body numbers, and check LGU/LTFRB tariff matrices without creating an account.</p>
+        <div class="hero-actions">
+          <button class="btn btn-yellow" data-nav="compute">Compute Fare Now</button>
+          <button class="btn btn-outline-light" data-nav="toda">Lookup Body No.</button>
+        </div>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-val" id="statTodaCount">0</div>
+          <div class="stat-lbl">Registered TODAs</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="statUnitCount">0</div>
+          <div class="stat-lbl">Active Units</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="statReviewCount">0</div>
+          <div class="stat-lbl">Fare Reviews</div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="section-header">
+        <h2>Quick Services</h2>
+      </div>
+      <div class="quick-grid">
+        <button class="quick-tile" data-nav="compute">
+          <div class="tile-icon blue">🧮</div>
+          <div class="tile-title">Fare Calculator</div>
+          <div class="tile-desc">Shared, Pakyawan &amp; 20% Discounts</div>
+        </button>
+        <button class="quick-tile" data-nav="taripa">
+          <div class="tile-icon yellow">📋</div>
+          <div class="tile-title">Official Taripa</div>
+          <div class="tile-desc">Ordinance Matrices &amp; Caps</div>
+        </button>
+        <button class="quick-tile" data-nav="toda">
+          <div class="tile-icon navy">🛺</div>
+          <div class="tile-title">TODA &amp; Units</div>
+          <div class="tile-desc">Search Body # &amp; Driver Rating</div>
+        </button>
+        <button class="quick-tile" data-nav="ratings">
+          <div class="tile-icon blue">⭐</div>
+          <div class="tile-title">Rate a Trip</div>
+          <div class="tile-desc">Report Overcharging or Great Service</div>
+        </button>
+      </div>
+
+      <!-- Latest Important Announcements -->
+      <div class="section-header">
+        <h2>Official Advisories</h2>
+        <button class="link-btn" data-nav="about">View All</button>
+      </div>
+      <div id="homeAnnouncementsList" class="stack-list"></div>
+    </section>
+
+    <!-- ==================== 2. COMPUTE FARE MODULE ==================== -->
+    <section id="view-compute" class="view">
+      <div class="page-head">
+        <h1>Compute Fare</h1>
+        <p>Select transport mode, route, and ride arrangement based on configured sample tariffs.</p>
+      </div>
+
+      <div class="card">
+        <!-- Mode Switcher -->
+        <div class="segmented-control" role="tablist">
+          <button id="modeTricycle" class="seg-btn active" data-mode="tricycle">🛺 Tricycle</button>
+          <button id="modeBusJeep" class="seg-btn" data-mode="bus_jeep">🚌 Bus / Jeepney</button>
+        </div>
+
+        <form id="fareCalcForm" class="form-stack" novalidate>
+          <!-- Tricycle TODA selector -->
+          <div id="tricycleTodaGroup" class="form-group">
+            <label for="calcTodaSelect">TODA / Zone Tariff</label>
+            <select id="calcTodaSelect" class="form-control"></select>
+          </div>
+
+          <!-- Bus/Jeep Route Type selector -->
+          <div id="busJeepTypeGroup" class="form-group hidden">
+            <label for="calcVehicleClass">Vehicle Classification</label>
+            <select id="calcVehicleClass" class="form-control"></select>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="calcOrigin">Origin</label>
+              <select id="calcOrigin" class="form-control"></select>
+            </div>
+            <div class="form-group">
+              <label for="calcDestination">Destination</label>
+              <select id="calcDestination" class="form-control"></select>
+            </div>
+          </div>
+
+          <!-- Tricycle Arrangement -->
+          <div id="tricycleOptionsGroup">
+            <div class="form-group">
+              <label>Ride Arrangement</label>
+              <div class="radio-cards">
+                <label class="radio-card">
+                  <input type="radio" name="rideType" value="shared" checked />
+                  <span><strong>Shared (Regular)</strong><small>Per passenger seat</small></span>
+                </label>
+                <label class="radio-card">
+                  <input type="radio" name="rideType" value="pakyawan" />
+                  <span><strong>Pakyawan (Special)</strong><small>Exclusive trip / capped</small></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group checkbox-row">
+              <input type="checkbox" id="calcMidRoute" />
+              <label for="calcMidRoute">Mid-route / Off-terminal pickup (+₱5.00 convenience surcharge where applicable)</label>
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="calcPassengers">Total Passengers</label>
+              <input type="number" id="calcPassengers" class="form-control" min="1" max="10" value="1" required />
+            </div>
+            <div class="form-group">
+              <label for="calcDiscountedCount">Student / Senior / PWD (20% Off)</label>
+              <input type="number" id="calcDiscountedCount" class="form-control" min="0" max="10" value="0" required />
+            </div>
+          </div>
+
+          <div id="calcValidationMsg" class="alert alert-error hidden"></div>
+
+          <div class="btn-row">
+            <button type="submit" class="btn btn-primary btn-block">Calculate Fare</button>
+            <button type="button" id="btnResetCalc" class="btn btn-secondary">Reset</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Fare Result Card -->
+      <div id="fareResultCard" class="card result-card hidden">
+        <div class="result-header">
+          <div>
+            <span class="badge badge-blue" id="resModeBadge">TRICYCLE</span>
+            <h2 id="resRouteTitle">Origin → Destination</h2>
+          </div>
+          <div class="total-fare-box">
+            <span class="total-label">Total Estimated Fare</span>
+            <span class="total-amount" id="resTotalFare">₱0.00</span>
+          </div>
+        </div>
+
+        <div class="per-pax-strip">
+          <span>Average Fare Per Passenger:</span>
+          <strong id="resPerPassenger">₱0.00</strong>
+        </div>
+
+        <div class="breakdown-list" id="resBreakdownList"></div>
+
+        <div class="taripa-ref-note" id="resTariffNote"></div>
+
+        <div class="btn-row mt-12">
+          <button type="button" id="btnSaveTrip" class="btn btn-yellow">Save to Trip History</button>
+          <button type="button" id="btnRateThisRoute" class="btn btn-outline">Rate This Trip</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 3. TODA & UNITS MODULE ==================== -->
+    <section id="view-toda" class="view">
+      <div class="page-head">
+        <h1>TODA &amp; Units Directory</h1>
+        <p>Search verified tricycle organizations, body numbers, and driver ratings.</p>
+      </div>
+
+      <div class="card">
+        <div class="form-group">
+          <label for="todaSearchInput">Search by Body Number, Driver Name, or TODA</label>
+          <input type="search" id="todaSearchInput" class="form-control" placeholder="e.g., 0142, VIMTODA, Dela Cruz..." />
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="todaFilterOrg">Filter by TODA</label>
+            <select id="todaFilterOrg" class="form-control">
+              <option value="all">All TODAs</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="todaFilterStatus">Verification Status</label>
+            <select id="todaFilterStatus" class="form-control">
+              <option value="all">All Units</option>
+              <option value="verified">Verified Only</option>
+              <option value="pending">Pending Renewal</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- TODA Organization Summary Cards -->
+      <div class="section-header">
+        <h2>Registered TODA Organizations</h2>
+      </div>
+      <div id="todaOrgCards" class="stack-list mb-16"></div>
+
+      <!-- Units & Drivers List -->
+      <div class="section-header">
+        <h2>Units &amp; Drivers (<span id="unitResultCount">0</span>)</h2>
+      </div>
+      <div id="unitsList" class="stack-list"></div>
+    </section>
+
+    <!-- ==================== 4. RATINGS & REVIEWS MODULE ==================== -->
+    <section id="view-ratings" class="view">
+      <div class="page-head">
+        <h1>Ratings &amp; Reviews</h1>
+        <p>Community feedback comparing expected taripa versus actual collected fares.</p>
+      </div>
+
+      <!-- Submit Review Box (Auth Gated) -->
+      <div class="card">
+        <div class="card-title-row">
+          <h2>Submit Trip Rating</h2>
+          <span id="reviewAuthBadge" class="badge badge-navy">Passenger Login Required</span>
+        </div>
+
+        <div id="reviewLoginPrompt" class="auth-gate-box">
+          <p>You are browsing as a <strong>Guest</strong>. Please sign in or register as a Passenger to submit verified ratings and prevent duplicate reports.</p>
+          <button class="btn btn-primary" id="btnReviewLoginTrigger">Sign In to Rate</button>
+        </div>
+
+        <form id="reviewForm" class="form-stack hidden" novalidate>
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="revUnitSelect">Select Unit / Body Number</label>
+              <select id="revUnitSelect" class="form-control" required></select>
+            </div>
+            <div class="form-group">
+              <label for="revRouteInput">Route Taken</label>
+              <input type="text" id="revRouteInput" class="form-control" placeholder="e.g., Poblacion to Villa Isla" required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Star Rating (1 to 5)</label>
+            <div class="star-picker" id="starPicker" role="radiogroup" aria-label="Star Rating">
+              <button type="button" class="star-btn active" data-star="1">★</button>
+              <button type="button" class="star-btn active" data-star="2">★</button>
+              <button type="button" class="star-btn active" data-star="3">★</button>
+              <button type="button" class="star-btn active" data-star="4">★</button>
+              <button type="button" class="star-btn active" data-star="5">★</button>
+            </div>
+            <input type="hidden" id="revStarValue" value="5" />
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="revExpectedFare">Expected Taripa Fare (₱)</label>
+              <input type="number" id="revExpectedFare" class="form-control" step="0.5" min="1" placeholder="e.g., 20" required />
+            </div>
+            <div class="form-group">
+              <label for="revActualFare">Actual Paid Fare (₱)</label>
+              <input type="number" id="revActualFare" class="form-control" step="0.5" min="1" placeholder="e.g., 20" required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Quick Feedback Tags</label>
+            <div class="tag-chips" id="feedbackTagChips">
+              <button type="
+class="chip-toggle" data-tag="Exact Taripa">Exact Taripa</button>
+              <button type="button" class="chip-toggle" data-tag="Polite Driver">Polite Driver</button>
+              <button type="button" class="chip-toggle" data-tag="Honored 20% Discount">Honored 20% Discount</button>
+              <button type="button" class="chip-toggle" data-tag="Clean Unit">Clean Unit</button>
+              <button type="button" class="chip-toggle" data-tag="Overcharged">Overcharged</button>
+              <button type="button" class="chip-toggle" data-tag="Refused Discount">Refused Discount</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="revComment">Optional Comment</label>
+            <textarea id="revComment" class="form-control" rows="2" placeholder="Share details about your ride experience..."></textarea>
+          </div>
+
+          <div id="revFormError" class="alert alert-error hidden"></div>
+          <button type="submit" class="btn btn-primary">Submit Rating</button>
+        </form>
+      </div>
+
+      <!-- Reviews Feed -->
+      <div class="section-header">
+        <h2>Recent Commuter Reviews (<span id="reviewsTotalLabel">0</span>)</h2>
+        <select id="reviewFilterSelect" class="form-control compact-select">
+          <option value="all">All Ratings</option>
+          <option value="5">5 Stars</option>
+          <option value="4">4 Stars</option>
+          <option value="low">1–3 Stars (Alerts)</option>
+        </select>
+      </div>
+      <div id="reviewsFeed" class="stack-list"></div>
+    </section>
+
+    <!-- ====================
+    5. OFFICIAL TARIPA MODULE ==================== -->
+    <section id="view-taripa" class="view">
+      <div class="page-head">
+        <h1>Official Taripa Matrices</h1>
+        <p>Sample reference schedules, discount rules, and pakyawan fare caps.</p>
+      </div>
+
+      <div class="card info-highlight">
+        <h3>Statutory Discount Rules (RA 9994 / RA 10754 / RA 11314)</h3>
+        <ul class="bullet-list">
+          <li><strong>20% Fare Discount:</strong> Applies to Students (with valid school ID), Senior Citizens, and Persons with Disabilities (PWDs) on regular/shared rides.</li>
+          <li><strong>Pakyawan / Special Trips:</strong> Capped per trip per local ordinance; divided equally among riding passengers.</li>
+          <li><strong>Sample Data Notice:</strong> Figures below are demonstration entries modeled on Nueva Ecija municipal matrices. Always check the laminated LGU taripa inside the vehicle.</li>
+        </ul>
+      </div>
+
+      <div class="segmented-control">
+        <button id="tabTaripaTrike" class="seg-btn active" data-taripa-tab="tricycle">🛺 Tricycle Taripa</button>
+        <button id="tabTaripaBus" class="seg-btn" data-taripa-tab="bus_jeep">🚌 Bus / Jeepney Taripa</button>
+      </div>
+
+      <div id="taripaContentArea" class="stack-list"></div>
+    </section>
+
+    <!-- ==================== 6. TRIP HISTORY MODULE ==================== -->
+    <section id="view-history" class="view">
+      <div class="page-head">
+        <h1>My Trip History</h1>
+        <p>Saved fare computations and logged rides for your account.</p>
+      </div>
+
+      <div id="historyAuthGate" class="card auth-gate-box hidden">
+        <h2>Sign In Required</h2>
+        <p>Log in as a Passenger to view and manage your saved fare computations and ride logs.</p>
+        <button class="btn btn-primary" id="btnHistoryLogin">Sign In / Register</button>
+      </div>
+
+      <div id="historyAuthenticatedArea" class="hidden">
+        <div class="section-header">
+          <h2>Saved Computations (<span id="historyCount">0</span>)</h2>
+          <button id="btnClearHistory" class="btn btn-secondary btn-sm">Clear History</button>
+        </div>
+        <div id="tripHistoryList" class="stack-list"></div>
+      </div>
+    </section>
+    
+    <!-- ==================== 7. SETTINGS MODULE ==================== -->
+    <section id="view-settings" class="view">
+      <div class="page-head">
+        <h1>Settings</h1>
+        <p>Manage your account profile, app preferences, notifications, and privacy.</p>
+      </div>
+
+      <!-- Account Settings -->
+      <div class="card">
+        <h2>Account Settings</h2>
+        <div id="settingsGuestState">
+          <p class="muted">You are currently using TaripaPH as a Guest. Sign in to customize your commuter profile or access role dashboards.</p>
+          <button class="btn btn-primary mt-12" id="btnSettingsSignIn">Sign In or Create Account</button>
+        </div>
+
+        <form id="accountSettingsForm" class="form-stack hidden">
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="setFullName">Full Name</label>
+              <input type="text" id="setFullName" class="form-control" required />
+            </div>
+            <div class="form-group">
+              <label for="setEmail">Email / Username</label>
+              <input type="text" id="setEmail" class="form-control" disabled />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="setPassengerCategory">Default Passenger Discount Category</label>
+            <select id="setPassengerCategory" class="form-control">
+              <option value="regular">Regular Commuter</option>
+              <option value="student">Student (20% Discount Eligible)</option>
+              <option value="senior">Senior Citizen (20% Discount Eligible)</option>
+              <option value="pwd">PWD (20% Discount Eligible)</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary">Save Profile Changes</button>
+        </form>
+      </div>
+
+      <!-- Notifications & App Preferences -->
+      <div class="card">
+        <h2>Notifications &amp; App Preferences</h2>
+        <div class="toggle-list">
+          <label class="toggle-item">
+            <div>
+              <strong>Tariff Update Alerts</strong>
+              <small>Notify when LGU or LTFRB fare matrices change</small>
+            </div>
+            <input type="checkbox" id="prefNotifTariff" checked />
+          </label>
+          <label class="toggle-item">
+            <div>
+              <strong>Overcharge Advisory Alerts</strong>
+              <small>Highlight routes with recent fare discrepancy reports</small>
+            </div>
+            <input type="checkbox" id="prefNotifAdvisory" checked />
+          </label>
+          <label class="toggle-item">
+            <div>
+              <strong>Auto-Apply Default Discount in Calculator</strong>
+              <small>Automatically pre-fill 1 discounted passenger if eligible</small>
+            </div>
+            <input type="checkbox" id="prefAutoDiscount" />
+          </label>
+        </div>
+      </div>
+
+      <!-- Privacy & Security -->
+      <div class="card">
+        <h2>Privacy &amp; Security</h2>
+        <p class="muted mb-12">Demo storage runs locally in your browser via <code>localStorage</code> and <code>sessionStorage</code>. You can reset all demo data back to factory defaults at any time.</p>
+        <div class="btn-row">
+          <button type="button" id="btnResetDemoData" class="btn btn-secondary">Reset Demo Storage</button>
+          <button type="button" id="btnSettingsLogout" class="btn btn-danger hidden">Log Out</button>
+        </div>
+      </div>
+
+      <!-- Help & Support -->
+      <div class="card">
+        <h2>Help &amp; Support</h2>
+        <p class="muted">Need to report a persistent overcharging incident? Note the unit's <strong>Body Number</strong>, <strong>TODA</strong>, date/time, and route, then submit a review or contact your local Municipal Tricycle Franchising and Regulatory Board (MTFRB) / LTFRB hotline (1342).</p>
+      </div>
+    </section>
+    
+        <!-- ==================== 8. ABOUT TARIPAPH MODULE ==================== -->
+    <section id="view-about" class="view">
+      <div class="page-head">
+        <h1>About TaripaPH</h1>
+        <p>Official notices, community announcements, and external regulatory links.</p>
+      </div>
+
+      <!-- Announcements Section -->
+      <div class="section-header">
+        <h2>Announcements &amp; Official Notices</h2>
+        <button id="btnAdminManageAnnouncements" class="btn btn-yellow btn-sm hidden">+ Manage Notices</button>
+      </div>
+      <div id="aboutAnnouncementsList" class="stack-list mb-16"></div>
+
+      <!-- External Websites -->
+      <div class="card">
+        <div class="card-title-row">
+          <h2>Official External Websites</h2>
+          <button id="btnAdminAddLink" class="btn btn-outline btn-sm hidden">+ Add Link</button>
+        </div>
+        <div id="externalLinksList" class="link-list"></div>
+      </div>
+
+      <!-- Legal & Contact Accordion / Cards -->
+      <div class="card">
+        <h2>Privacy Policy</h2>
+        <p class="muted">TaripaPH respects commuter privacy. In this demonstration version, all user accounts, trip history logs, and ratings are stored exclusively on your device's browser storage and are never transmitted to external servers.</p>
+      </div>
+
+      <div class="card">
+        <h2>Terms &amp; Conditions</h2>
+        <p class="muted">TaripaPH provides fare calculations for informational guidance based on configured tariff schedules. Official laminated taripa matrices issued by the local government unit (LGU) or LTFRB prevail in case of discrepancy.</p>
+      </div>
+
+      <div class="card">
+        <h2>Contact Us</h2>
+        <p class="muted"><strong>TaripaPH Civic Mobility Desk</strong><br />Email: support@taripaph.demo.ph<br />LTFRB 24/7 Commuter Hotline: 1342</p>
+      </div>
+    </section>
+
+    <!-- ==================== 9. DRIVER DASHBOARD ==================== -->
+    <section id="view-driver-dash" class="view">
+      <div class="page-head">
+        <h1>Driver Dashboard</h1>
+        <p>Manage your registered tricycle unit profile and view passenger feedback.</p>
+      </div>
+      <div id="driverDashContent"></div>
+    </section>
+
+    <!-- ==================== 10. TODA OFFICIAL DASHBOARD ==================== -->
+    <section id="view-toda-dash" class="view">
+      <div class="page-head">
+        <h1>TODA Official Dashboard</h1>
+        <p>Monitor organization units, verify franchise status, and review rider feedback.</p>
+      </div>
+      <div id="todaDashContent"></div>
+    </section>
+
+    <!-- ==================== 11. ADMINISTRATOR DASHBOARD ==================== -->
+    <section id="view-admin-dash" class="view">
+      <div class="page-head">
+        <h1>Administrator Dashboard</h1>
+        <p>Manage tariff matrices, TODA verification, announcements, and external links.</p>
+      </div>
+      <div id="adminDashContent"></div>
+    </section>
+
+  </main>
+
+  <!-- BOTTOM MOBILE NAVIGATION -->
+  <nav class="bottom-nav" aria-label="Bottom Navigation">
+    <button class="bottom-btn active" data-nav="home">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V9.5z"></path>
+      </svg>
+      <span>Home</span>
+    </button>
+    <button class="bottom-btn" data-nav="compute">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="4" y="2" width="16" height="20" rx="2"></rect>
+        <line x1="8" y1="6" x2="16" y2="6"></line>
+        <line x1="8" y1="11" x2="10" y2="11"></line>
+        <line x1="14" y1="11" x2="16" y2="11"></line>
+        <line x1="8" y1="15" x2="10" y2="15"></line>
+        <line x1="14" y1="15" x2="16" y2="15"></line>
+      </svg>
+      <span>Compute</span>
+    </button>
+    <button class="bottom-btn" data-nav="toda">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="7"></circle>
+        <line x1="20" y1="20" x2="16.2" y2="16.2"></line>
+      </svg>
+      <span>TODA</span>
+    </button>
+    <button class="bottom-btn" data-nav="taripa">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+        <line x1="8" y1="13" x2="16" y2="13"></line>
+        <line x1="8" y1="17" x2="16" y2="17"></line>
+      </svg>
+      <span>Taripa</span>
+    </button>
+    <button class="bottom-btn" data-nav="ratings">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+      </svg>
+      <span>Reviews</span>
+    </button>
+  </nav>
+  
+  <!-- AUTHENTICATION MODAL -->
+  <div id="authModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2 id="authModalTitle">Sign In to TaripaPH</h2>
+        <button type="button" class="icon-btn" id="btnCloseAuthModal" aria-label="Close Modal">✕</button>
+      </div>
+
+      <div class="segmented-control mb-12">
+        <button type="button" id="tabLogin" class="seg-btn active">Sign In</button>
+        <button type="button" id="tabRegister" class="seg-btn">Register Passenger</button>
+      </div>
+
+      <!-- Login Form -->
+      <form id="loginForm" class="form-stack">
+        <div class="form-group">
+          <label for="loginEmail">Email or Demo Account</label>
+          <input type="text" id="loginEmail" class="form-control" placeholder="Enter email or select quick demo role below" required />
+        </div>
+        <div class="form-group">
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" class="form-control" placeholder="Enter password" required />
+        </div>
+        <div id="loginError" class="alert alert-error hidden"></div>
+        <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+
+        <div class="demo-accounts-box">
+          <div class="demo-accounts-title">One-Click Demo Role Accounts:</div>
+          <div class="demo-role-pills">
+            <button type="button" class="role-pill" data-demo-user="passenger@taripaph.demo">Passenger</button>
+            <button type="button" class="role-pill" data-demo-user="driver@taripaph.demo">Driver</button>
+            <button type="button" class="role-pill" data-demo-user="toda@taripaph.demo">TODA Official</button>
+            <button type="button" class="role-pill" data-demo-user="admin@taripaph.demo">Administrator</button>
+          </div>
+        </div>
+      </form>
+
+      <!-- Passenger Registration Form -->
+      <form id="registerForm" class="form-stack hidden">
+        <div class="form-group">
+          <label for="regName">Full Name</label>
+          <input type="text" id="regName" class="form-control" placeholder="Juan Dela Cruz" req    uired />
+        </div>
+        <div class="form-group">
+          <label for="regEmail">Email Address</label>
+          <input type="email" id="regEmail" class="form-control" placeholder="juan@example.com" required />
+        </div>
+        <div class="form-group">
+          <label for="regCategory">Commuter Type</label>
+          <select id="regCategory" class="form-control">
+            <option value="regular">Regular Passenger</option>
+            <option value="student">Student</option>
+            <option value="senior">Senior Citizen</option>
+            <option value="pwd">PWD</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="regPassword">Create Password (min. 6 chars)</label>
+          <input type="password" id="regPassword" class="form-control" minlength="6" required />
+        </div>
+        <div id="regError" class="alert alert-error hidden"></div>
+        <button type="submit" class="btn btn-yellow btn-block">Create Passenger Account</button>
+      </form>
+    </div>
+  </div>
+  
+  !-- GENERIC DETAIL / CONFIRMATION MODAL -->
+  <div id="detailModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="detailModalTitle">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2 id="detailModalTitle">Details</h2>
+        <button type="button" class="icon-btn" id="btnCloseDetailModal" aria-label="Close Modal">✕</button>
+      </div>
+      <div id="detailModalBody"></div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script src="script.js"></script>
+</body>
+
+</body>
+</html>
